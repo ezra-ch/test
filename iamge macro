@@ -1,0 +1,49 @@
+import cv2
+import pyautogui
+import time
+import random
+import sys
+
+# Define a dictionary mapping target images to action states
+actions = {
+    'target_image_1.png': False,  # Action has not been performed
+    'target_image_2.png': False,  # Action has not been performed
+    'target_image_3.png': False,  # Action has not been performed
+}
+
+# Loop indefinitely
+while True:
+    # Pause for a random amount of time between 0.5 and 1.5 seconds
+    delay = random.uniform(0.5, 1.5)
+    time.sleep(delay)
+
+    # Get a screenshot of the current screen
+    screenshot = pyautogui.screenshot()
+
+    # Convert the screenshot to a numpy array
+    screenshot_np = np.array(screenshot)
+
+    # Convert the screenshot from BGR to RGB (OpenCV uses BGR by default)
+    screenshot_rgb = cv2.cvtColor(screenshot_np, cv2.COLOR_BGR2RGB)
+
+    # Check if any of the target images are in the screenshot
+    for target_image_path, action_performed in actions.items():
+        # Load the target image
+        target_image = cv2.imread(target_image_path)
+
+        # Use cv2.matchTemplate to find the target image in the screenshot
+        result = cv2.matchTemplate(screenshot_rgb, target_image, cv2.TM_CCOEFF_NORMED)
+
+        # Check if the match is above a certain threshold
+        threshold = 0.9  # Adjust this value to set the sensitivity of the match
+        loc = np.where(result >= threshold)
+
+        # If we found a match and the action has not been performed yet, perform the action
+        if len(loc[0]) > 0 and not action_performed:
+            # Perform the action associated with the target image
+            if target_image_path == 'target_image_1.png':
+                pyautogui.click(100, 100)  # Click at coordinates (100, 100)
+            elif target_image_path == 'target_image_2.png':
+                pyautogui.press('space')  # Press the space bar
+            elif target_image_path == 'target_image_3.png':
+                pyautogui.typewrite('Hello, world!', interval=0.1)  # Type the string 'Hello, world!'
